@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>org.indies.la</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPMincho&family=Victor+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'DINdong';
+      src: url('https://indies.la/fonts/DINdong.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: rgb(16, 15, 15);
+      --bg-2: rgb(28, 27, 26);
+      --ui: rgb(40, 39, 38);
+      --ui-2: rgb(52, 51, 49);
+      --ui-3: rgb(64, 62, 60);
+      --tx-3: rgb(87, 86, 83);
+      --tx-2: rgb(135, 133, 128);
+      --tx: rgb(206, 205, 195);
+      --og: oklch(0.66 0.18 45);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--tx);
+      font-family: 'BIZ UDPMincho', serif;
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    a { color: var(--og); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+
+    header {
+      margin-bottom: 48px;
+    }
+
+    header h1 {
+      font-family: 'DINdong', 'BIZ UDPMincho', serif;
+      font-size: 2rem;
+      font-weight: 400;
+      color: var(--tx);
+      text-transform: lowercase;
+    }
+
+    header p {
+      color: var(--tx-2);
+      font-size: 1.1rem;
+      margin-top: 8px;
+    }
+
+    .section-title {
+      font-family: 'Victor Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--tx-3);
+      text-transform: lowercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--ui);
+    }
+
+    .projects {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 48px;
+    }
+
+    .project {
+      background: var(--bg-2);
+      border: 1px solid var(--ui);
+      border-radius: 8px;
+      padding: 20px 24px;
+      transition: border-color 0.2s;
+    }
+
+    .project:hover {
+      border-color: var(--ui-2);
+    }
+
+    .project-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .project-name {
+      font-family: 'DINdong', 'BIZ UDPMincho', serif;
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: var(--tx);
+      text-transform: lowercase;
+    }
+
+    .project-status {
+      font-family: 'Victor Mono', monospace;
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 100px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .status-active {
+      background: rgba(200, 120, 50, 0.15);
+      color: var(--og);
+      border: 1px solid rgba(200, 120, 50, 0.3);
+    }
+
+    .status-planning {
+      background: rgba(135, 133, 128, 0.1);
+      color: var(--tx-2);
+      border: 1px solid var(--ui-2);
+    }
+
+    .status-shelved {
+      background: rgba(87, 86, 83, 0.1);
+      color: var(--tx-3);
+      border: 1px solid var(--ui);
+    }
+
+    .project-desc {
+      color: var(--tx-2);
+      font-size: 0.95rem;
+      margin-bottom: 16px;
+    }
+
+    .project-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      font-family: 'Victor Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--tx-3);
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meta-label {
+      color: var(--tx-3);
+    }
+
+    .meta-value {
+      color: var(--tx-2);
+    }
+
+    .progress-bar {
+      width: 80px;
+      height: 4px;
+      background: var(--ui);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--og);
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+
+    .project-link {
+      font-family: 'Victor Mono', monospace;
+      font-size: 0.8rem;
+    }
+
+    .btn-reclamar {
+      font-family: 'Victor Mono', monospace;
+      font-size: 0.8rem;
+      background: transparent;
+      color: var(--og);
+      border: 1px solid var(--og);
+      padding: 6px 16px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 12px;
+    }
+
+    .btn-reclamar:hover {
+      background: var(--og);
+      color: var(--bg);
+    }
+
+    .deadline-soon {
+      color: var(--og);
+    }
+
+    footer {
+      border-top: 1px solid var(--ui);
+      padding-top: 24px;
+      margin-top: 48px;
+      font-family: 'Victor Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--tx-3);
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .project-header {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .project-meta {
+        flex-direction: column;
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>org.indies.la</h1>
+      <p>proyectos de la comunidad</p>
+    </header>
+
+    <div class="section-title">proyectos activos</div>
+    <div class="projects" id="active-projects"></div>
+
+    <div class="section-title">en pausa — disponibles para reclamar</div>
+    <div class="projects" id="shelved-projects"></div>
+
+    <footer>
+      <a href="https://indies.la">indies.la</a>
+    </footer>
+  </div>
+
+  <script>
+    const projects = [
+      {
+        name: "hack contra la corrupcion",
+        desc: "a hack to fight corruption in latam.",
+        url: "https://hack.indies.la/en",
+        lead: "—",
+        progress: 40,
+        deadline: "2026-06-01",
+        status: "active",
+      },
+      {
+        name: "hackathon tour latam",
+        desc: "a latam-wide irl hackathon tour.",
+        url: "https://hack.platan.us/en/tour/sponsor",
+        lead: "—",
+        progress: 30,
+        deadline: "2026-05-15",
+        status: "active",
+      },
+      {
+        name: "la clase",
+        desc: "a yc/stanford-type class for 150 people irl.",
+        url: "https://natochi.cv/laclase/",
+        lead: "—",
+        progress: 60,
+        deadline: "2026-04-20",
+        status: "active",
+      },
+      {
+        name: "fireside chats",
+        desc: "a monthly fireside chat event with founders.",
+        url: null,
+        lead: "—",
+        progress: 50,
+        deadline: null,
+        status: "active",
+      },
+      {
+        name: "torneo de ajedrez",
+        desc: "a chess tournament for the community.",
+        url: null,
+        lead: "—",
+        progress: 20,
+        deadline: null,
+        status: "planning",
+      },
+      {
+        name: "startupchela",
+        desc: "a series of events called startupchela.",
+        url: null,
+        lead: null,
+        progress: 0,
+        deadline: null,
+        status: "shelved",
+      },
+      {
+        name: "spomenik — microgrants",
+        desc: "a microgrant project for latam.",
+        url: "https://natochi.cv/spomenik/",
+        lead: null,
+        progress: 0,
+        deadline: null,
+        status: "shelved",
+      },
+    ];
+
+    function formatDate(dateStr) {
+      if (!dateStr) return null;
+      const d = new Date(dateStr);
+      const months = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+      return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    }
+
+    function isDeadlineSoon(dateStr) {
+      if (!dateStr) return false;
+      const diff = new Date(dateStr) - new Date();
+      const days = diff / (1000 * 60 * 60 * 24);
+      return days >= 0 && days <= 30;
+    }
+
+    function renderProject(p) {
+      const statusClass = `status-${p.status}`;
+      const statusLabel = p.status === "active" ? "activo" : p.status === "planning" ? "planeando" : "en pausa";
+      const deadlineClass = isDeadlineSoon(p.deadline) ? "deadline-soon" : "";
+
+      let html = `
+        <div class="project">
+          <div class="project-header">
+            <div class="project-name">${p.url ? `<a href="${p.url}">${p.name}</a>` : p.name}</div>
+            <span class="project-status ${statusClass}">${statusLabel}</span>
+          </div>
+          <div class="project-desc">${p.desc}</div>
+          <div class="project-meta">
+            <div class="meta-item">
+              <span class="meta-label">lead:</span>
+              <span class="meta-value">${p.lead || "sin asignar"}</span>
+            </div>
+            ${p.deadline ? `
+            <div class="meta-item">
+              <span class="meta-label">deadline:</span>
+              <span class="meta-value ${deadlineClass}">${formatDate(p.deadline)}</span>
+            </div>` : ""}
+            <div class="meta-item">
+              <span class="meta-label">progreso:</span>
+              <div class="progress-bar"><div class="progress-fill" style="width:${p.progress}%"></div></div>
+              <span class="meta-value">${p.progress}%</span>
+            </div>
+            ${p.url ? `<a href="${p.url}" class="project-link">${p.url.replace(/https?:\/\//, "")}</a>` : ""}
+          </div>
+          ${p.status === "shelved" ? `<button class="btn-reclamar" onclick="reclamar('${p.name}')">reclamar proyecto</button>` : ""}
+        </div>
+      `;
+      return html;
+    }
+
+    function reclamar(name) {
+      const email = "hola@indies.la";
+      const subject = encodeURIComponent(`quiero reclamar: ${name}`);
+      const body = encodeURIComponent(`hola, me interesa liderar el proyecto "${name}". mi nombre es: \nmi idea para avanzarlo: `);
+      window.open(`mailto:${email}?subject=${subject}&body=${body}`);
+    }
+
+    const activeContainer = document.getElementById("active-projects");
+    const shelvedContainer = document.getElementById("shelved-projects");
+
+    projects.forEach(p => {
+      if (p.status === "shelved") {
+        shelvedContainer.innerHTML += renderProject(p);
+      } else {
+        activeContainer.innerHTML += renderProject(p);
+      }
+    });
+  </script>
+</body>
+</html>
