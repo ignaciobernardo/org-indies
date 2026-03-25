@@ -245,6 +245,114 @@
     }
     .chart-bar-group:hover .tooltip { display: block; }
 
+    /* discord heatmap */
+    .heatmap-header {
+      display: flex;
+      gap: 24px;
+      font-size: 12px;
+      margin-bottom: 12px;
+      color: var(--tx-3);
+    }
+    .heatmap-header .hval { color: var(--green); }
+
+    .heatmap-wrapper {
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .heatmap {
+      display: flex;
+      gap: 3px;
+    }
+
+    .heatmap-col {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .heatmap-cell {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      background: var(--ui);
+    }
+
+    .h-1 { background: rgba(90, 240, 120, 0.15); }
+    .h-2 { background: rgba(90, 240, 120, 0.35); }
+    .h-3 { background: rgba(90, 240, 120, 0.55); }
+    .h-4 { background: rgba(90, 240, 120, 0.8); }
+
+    .heatmap-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 10px;
+      color: var(--tx-3);
+    }
+
+    /* discord members line chart */
+    .tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 12px;
+    }
+
+    .tab {
+      font-family: 'Victor Mono', monospace;
+      font-size: 12px;
+      background: transparent;
+      color: var(--tx-3);
+      border: 1px solid var(--ui);
+      padding: 4px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .tab:first-child { border-radius: 4px 0 0 4px; }
+    .tab:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+
+    .tab.active {
+      color: var(--og);
+      border-color: var(--og);
+      background: rgba(232, 101, 24, 0.08);
+    }
+    .tab.active + .tab { border-left-color: var(--og); }
+
+    .line-chart-container {
+      position: relative;
+      height: 140px;
+    }
+
+    .line-chart-container svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .line-chart-grid line {
+      stroke: rgba(255,255,255,0.04);
+      stroke-width: 1;
+    }
+
+    .chart-line {
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .chart-area {
+      opacity: 0.1;
+    }
+
+    .line-chart-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--tx-3);
+      margin-top: 4px;
+    }
+
     @media (max-width: 700px) {
       .terminal { padding: 12px 8px; }
       .screen { padding: 16px 12px; }
@@ -310,6 +418,37 @@
           <div class="legend-item"><div class="legend-dot" style="background:#d97a2b"></div> unicas</div>
           <div class="legend-item"><div class="legend-dot" style="background:#e8c84d"></div> interacciones</div>
         </div>
+      </div>
+
+      <div class="blank"></div>
+      <div class="line"><span class="prompt">$</span> <span class="val">curl</span> <span class="flag">--silent</span> <span class="val">discord/activity/indies</span> <span class="comment"># por semana y quarter</span></div>
+      <div class="blank"></div>
+
+      <div class="chart-section">
+        <div class="heatmap-header">
+          <span>mensajes por dia</span>
+          <span>active: <span class="hval" id="hm-active">—</span></span>
+          <span>idle: <span class="hval" id="hm-idle">—</span></span>
+        </div>
+        <div class="heatmap-wrapper">
+          <div class="heatmap" id="heatmap"></div>
+        </div>
+        <div class="heatmap-labels" id="heatmap-labels"></div>
+      </div>
+
+      <div class="blank"></div>
+      <div class="line"><span class="prompt">$</span> <span class="val">curl</span> <span class="flag">--silent</span> <span class="val">discord/members/indies</span></div>
+      <div class="blank"></div>
+
+      <div class="chart-section">
+        <div class="tabs">
+          <button class="tab active" onclick="switchMemberTab('total')">total</button>
+          <button class="tab" onclick="switchMemberTab('semanal')">semanal</button>
+        </div>
+        <div class="line-chart-container">
+          <svg id="members-chart" viewBox="0 0 900 140" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="line-chart-labels" id="members-labels"></div>
       </div>
 
       <div class="blank"></div>
@@ -561,6 +700,121 @@
       `;
       chart.appendChild(group);
     });
+    // === discord activity heatmap ===
+    const weeks = 52;
+    const daysPerWeek = 7;
+    const heatmap = document.getElementById("heatmap");
+    const hmLabels = document.getElementById("heatmap-labels");
+
+    // mock: generate 52 weeks of daily activity
+    const heatData = [];
+    for (let w = 0; w < weeks; w++) {
+      const week = [];
+      for (let d = 0; d < daysPerWeek; d++) {
+        const base = Math.sin(w * 0.15) * 0.3 + 0.4;
+        const weekend = (d >= 5) ? 0.3 : 0;
+        const val = Math.max(0, base + weekend + (Math.random() * 0.5 - 0.2));
+        week.push(Math.min(1, val));
+      }
+      heatData.push(week);
+    }
+
+    heatData.forEach(week => {
+      const col = document.createElement("div");
+      col.className = "heatmap-col";
+      week.forEach(val => {
+        const cell = document.createElement("div");
+        cell.className = "heatmap-cell";
+        if (val > 0.7) cell.classList.add("h-4");
+        else if (val > 0.45) cell.classList.add("h-3");
+        else if (val > 0.2) cell.classList.add("h-2");
+        else if (val > 0.05) cell.classList.add("h-1");
+        col.appendChild(cell);
+      });
+      heatmap.appendChild(col);
+    });
+
+    // quarter labels
+    const quarters = ["q3 2025", "q4 2025", "q1 2026"];
+    quarters.forEach(q => {
+      const span = document.createElement("span");
+      span.textContent = q;
+      hmLabels.appendChild(span);
+    });
+
+    // mock active/idle counts
+    document.getElementById("hm-active").textContent = "342";
+    document.getElementById("hm-idle").textContent = "128";
+
+    // === discord members line chart ===
+    const totalMembers = [];
+    const weeklyMembers = [];
+    let cumulative = 80;
+    for (let i = 0; i < 52; i++) {
+      const growth = Math.floor(Math.random() * 15 + 3 + Math.sin(i * 0.2) * 5);
+      cumulative += growth;
+      totalMembers.push(cumulative);
+      weeklyMembers.push(growth);
+    }
+
+    let currentTab = "total";
+
+    function drawMembersChart(data, color) {
+      const svg = document.getElementById("members-chart");
+      const w = 900, h = 140, pad = 2;
+      const max = Math.max(...data);
+      const min = Math.min(...data);
+      const range = max - min || 1;
+
+      const points = data.map((v, i) => {
+        const x = (i / (data.length - 1)) * w;
+        const y = h - pad - ((v - min) / range) * (h - pad * 2);
+        return { x, y };
+      });
+
+      const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
+      const areaD = pathD + ` L${w},${h} L0,${h} Z`;
+
+      // grid
+      let gridHtml = '';
+      for (let i = 0; i < 5; i++) {
+        const y = (i / 4) * h;
+        gridHtml += `<line x1="0" y1="${y}" x2="${w}" y2="${y}" class="line-chart-grid"/>`;
+      }
+
+      svg.innerHTML = `
+        <g class="line-chart-grid">${gridHtml}</g>
+        <path d="${areaD}" fill="${color}" class="chart-area"/>
+        <path d="${pathD}" stroke="${color}" class="chart-line"/>
+      `;
+
+      // labels
+      const labels = document.getElementById("members-labels");
+      labels.innerHTML = '';
+      const labelWeeks = [0, 12, 25, 38, 51];
+      labelWeeks.forEach(i => {
+        if (i < data.length) {
+          const span = document.createElement("span");
+          span.textContent = `w${i + 1}`;
+          labels.appendChild(span);
+        }
+      });
+    }
+
+    function switchMemberTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      if (tab === "total") {
+        document.querySelectorAll(".tab")[0].classList.add("active");
+        drawMembersChart(totalMembers, "#E86518");
+      } else {
+        document.querySelectorAll(".tab")[1].classList.add("active");
+        drawMembersChart(weeklyMembers, "#5af078");
+      }
+    }
+
+    // initial draw
+    drawMembersChart(totalMembers, "#E86518");
   </script>
 </body>
 </html>
